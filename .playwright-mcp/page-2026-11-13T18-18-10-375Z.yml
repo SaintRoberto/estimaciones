@@ -1,0 +1,162 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - button "Ir al mapa de estimación" [ref=e5] [cursor=pointer]:
+      - generic [ref=e10]:
+        - strong [ref=e11]: Mapa Monitoreo
+        - generic [ref=e12]: SNGR
+    - generic [ref=e13]: Monitoreo meteorológico de Ecuador
+    - navigation "Módulos principales" [ref=e14]:
+      - button "Estimaciones" [ref=e15] [cursor=pointer]
+      - button "Tormentas" [ref=e16] [cursor=pointer]
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e19]:
+        - paragraph [ref=e20]: Vigilancia meteorológica
+        - heading "Monitoreo de Tormentas" [level=1] [ref=e21]
+        - text: Observaciones satelitales y actividad eléctrica sobre Ecuador
+      - generic [ref=e22]:
+        - generic [ref=e28] [cursor=pointer]:
+          - combobox "Buscar dirección" [ref=e29]
+          - button [ref=e31]:
+            - img "search" [ref=e33]
+        - generic [ref=e36]: También puedes hacer clic en cualquier punto del mapa
+      - generic [ref=e37]:
+        - button "Activar modo oscuro" [ref=e38] [cursor=pointer]: ☾
+        - generic [ref=e41]:
+          - strong [ref=e42]: Servicios parciales
+          - generic [ref=e43]: Actualizando…
+    - generic [ref=e44]:
+      - complementary [ref=e45]:
+        - generic [ref=e46]:
+          - generic [ref=e47]: Capas y controles
+          - generic [ref=e48]: Fuentes observadas
+        - generic [ref=e49] [cursor=pointer]:
+          - generic [ref=e50]: ▧
+          - generic [ref=e51]:
+            - strong [ref=e52]: Precipitación observada
+            - generic [ref=e53]: NASA IMERG · cada 30 min
+          - checkbox "▧ Precipitación observada NASA IMERG · cada 30 min" [checked] [ref=e54]
+        - generic [ref=e55] [cursor=pointer]:
+          - generic [ref=e56]: ☁
+          - generic [ref=e57]:
+            - strong [ref=e58]: Nubes satelitales
+            - generic [ref=e59]: NASA GIBS · GOES-East
+          - checkbox "☁ Nubes satelitales NASA GIBS · GOES-East" [ref=e60]
+        - generic [ref=e61] [cursor=pointer]:
+          - generic [ref=e62]: ◐
+          - generic [ref=e63]:
+            - strong [ref=e64]: Nubes infrarrojas
+            - generic [ref=e65]: GOES-East · resalta topes fríos
+          - checkbox "◐ Nubes infrarrojas GOES-East · resalta topes fríos" [ref=e66]
+        - generic [ref=e67]:
+          - generic [ref=e68]: Opacidad
+          - strong [ref=e69]: 72%
+          - slider [ref=e70]: "72"
+        - generic [ref=e71] [cursor=pointer]:
+          - generic [ref=e72]: ϟ
+          - generic [ref=e73]:
+            - strong [ref=e74]: Actividad eléctrica
+            - generic [ref=e75]: NOAA GOES-19 · GLM
+          - checkbox "ϟ Actividad eléctrica NOAA GOES-19 · GLM" [checked] [ref=e76]
+        - generic [ref=e77] [cursor=pointer]:
+          - generic [ref=e78]: ◌
+          - generic [ref=e79]:
+            - strong [ref=e80]: Pronóstico de lluvia
+            - generic [ref=e81]: Open-Meteo
+          - checkbox "◌ Pronóstico de lluvia Open-Meteo" [checked] [ref=e82]
+        - generic [ref=e83]:
+          - generic [ref=e84]: Período de rayos
+          - generic [ref=e85]:
+            - button "15 min" [ref=e86] [cursor=pointer]
+            - button "30 min" [ref=e87] [cursor=pointer]
+            - button "60 min" [ref=e88] [cursor=pointer]
+        - button "◎ Usar mi ubicación" [ref=e89] [cursor=pointer]
+        - generic [ref=e90]:
+          - strong [ref=e91]: Intensidad de lluvia observada
+          - generic [ref=e93]:
+            - generic [ref=e94]: "0.1"
+            - generic [ref=e95]: "1"
+            - generic [ref=e96]: "5"
+            - generic [ref=e97]: 20+
+          - generic [ref=e98]: mm/h · verde a rojo
+          - generic [ref=e99]: Flash óptico GLM
+          - generic [ref=e101]: Punto de referencia
+          - generic [ref=e103]: Radios 10 / 40 km
+      - generic [ref=e105]:
+        - generic [ref=e106]:
+          - generic [ref=e107]:
+            - generic:
+              - generic:
+                - img:
+                  - generic:
+                    - generic [ref=e108] [cursor=pointer]
+                    - generic [ref=e109] [cursor=pointer]
+              - button [ref=e110] [cursor=pointer]
+              - generic:
+                - tooltip "40 km"
+                - tooltip "10 km"
+            - generic:
+              - generic [ref=e112]:
+                - button "Zoom in" [ref=e113] [cursor=pointer]: +
+                - button "Zoom out" [ref=e114] [cursor=pointer]: −
+              - generic [ref=e115]:
+                - link "Leaflet" [ref=e116] [cursor=pointer]:
+                  - /url: https://leafletjs.com
+                - text: "| ©"
+                - link "OpenStreetMap" [ref=e121] [cursor=pointer]:
+                  - /url: https://www.openstreetmap.org/copyright
+                - text: contributors
+          - generic [ref=e122]:
+            - generic [ref=e123]: ●
+            - generic [ref=e124]:
+              - strong [ref=e125]: Guayaquil
+              - generic [ref=e126]: "-2.1710, -79.9224"
+          - generic [ref=e127]: PRECIPITACIÓN OBSERVADA NASA IMERG · medición satelital disponible
+        - generic "Línea de tiempo satelital" [ref=e128]:
+          - generic [ref=e129]:
+            - button "Reproducir" [disabled] [ref=e130]: ▶
+            - button "Anterior" [disabled] [ref=e131]: ‹
+            - button "Siguiente" [disabled] [ref=e132]: ›
+          - generic [ref=e133]:
+            - generic [ref=e134]:
+              - strong [ref=e135]: Secuencia de nubes
+              - generic [ref=e136]: Consultando NASA GIBS…
+            - slider [disabled] [ref=e137]: "0"
+            - generic [ref=e138]:
+              - generic [ref=e139]: −2 h
+              - generic [ref=e140]: Ahora
+          - button "Más reciente" [disabled] [ref=e141]
+      - complementary [ref=e142]:
+        - generic [ref=e143]:
+          - generic [ref=e144]: Resumen de monitoreo
+          - generic [ref=e145]: Alrededor del punto
+        - generic [ref=e146]:
+          - generic [ref=e147]: Lluvia en el punto seleccionado
+          - paragraph [ref=e149]: Selecciona un punto para consultar las condiciones.
+        - generic [ref=e150]:
+          - generic [ref=e151]: Actividad eléctrica
+          - paragraph [ref=e153]: Datos no disponibles. La función serverless NOAA GLM no está desplegada.
+          - generic [ref=e154]:
+            - generic [ref=e155]:
+              - strong [ref=e156]: "0"
+              - text: flashes visibles
+            - generic [ref=e157]:
+              - strong [ref=e158]: —
+              - text: más cercano
+          - generic [ref=e159]:
+            - generic [ref=e160]: 0 dentro de 10 km
+            - generic [ref=e161]: 0 dentro de 40 km
+          - generic [ref=e162]:
+            - generic [ref=e163]: Última detección
+            - generic [ref=e164]: —
+        - generic [ref=e165]:
+          - generic [ref=e166]: Precipitación observada
+          - generic [ref=e168]: No disponible
+          - generic [ref=e169]:
+            - generic [ref=e170]: Medición IMERG
+            - generic [ref=e171]: —
+          - generic [ref=e172]: Estimación satelital de tasa de lluvia; no es radar terrestre.
+          - generic [ref=e173]:
+            - generic [ref=e174]: Imagen de nubes
+            - generic [ref=e175]: —
+        - paragraph [ref=e176]: Información orientativa. No constituye una alerta meteorológica oficial.

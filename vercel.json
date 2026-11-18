@@ -1,0 +1,4 @@
+{
+  "rewrites": [{ "source": "/tormentas", "destination": "/index.html" }],
+  "functions": { "api/lightning.py": { "maxDuration": 60 } }
+}
