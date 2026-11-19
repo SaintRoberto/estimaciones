@@ -4,9 +4,9 @@ import L, { type LatLngTuple } from 'leaflet'
 import 'leaflet-draw'
 
 interface Props {
-  polygon: LatLngTuple[] | null
+  polygons: LatLngTuple[][]
   clearToken: number
-  onChange: (points: LatLngTuple[] | null) => void
+  onChange: (polygons: LatLngTuple[][]) => void
   onDrawingChange: (drawing: boolean) => void
 }
 
@@ -32,8 +32,9 @@ function layerPoints(layer: L.Layer): LatLngTuple[] | null {
   return latLngs.map(({ lat, lng }) => [lat, lng])
 }
 
-export function PolygonDraw({ clearToken, onChange, onDrawingChange }: Props) {
+export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }: Props) {
   const map = useMap()
+  const initialPolygons = useRef(polygons)
   const previousClearToken = useRef(clearToken)
   const clearAllRef = useRef<() => void>(() => undefined)
   const onChangeRef = useRef(onChange)
@@ -43,6 +44,7 @@ export function PolygonDraw({ clearToken, onChange, onDrawingChange }: Props) {
 
   useEffect(() => {
     const completedGroup = new L.FeatureGroup().addTo(map)
+    for (const polygon of initialPolygons.current) L.polygon(polygon, polygonStyle).addTo(completedGroup)
     const draftGroup = new L.FeatureGroup().addTo(map)
     const points: L.LatLng[] = []
     let drawing = false
@@ -67,16 +69,23 @@ export function PolygonDraw({ clearToken, onChange, onDrawingChange }: Props) {
       }
     }
 
+    const publishPolygons = () => {
+      const polygons: LatLngTuple[][] = []
+      completedGroup.eachLayer((layer) => {
+        const vertices = layerPoints(layer)
+        if (vertices) polygons.push(vertices)
+      })
+      onChangeRef.current(polygons)
+    }
+
     const closePolygon = (event?: L.LeafletMouseEvent) => {
       if (event?.originalEvent) L.DomEvent.stopPropagation(event.originalEvent)
       if (points.length < 3) return
 
-      completedGroup.clearLayers()
       const activeStyle = drawingMode === 'vertices' ? vertexStyle : polygonStyle
-      const polygonLayer = L.polygon(points, activeStyle).addTo(completedGroup)
-      const result = layerPoints(polygonLayer)
+      L.polygon(points, activeStyle).addTo(completedGroup)
       finishDraft()
-      onChangeRef.current(result)
+      publishPolygons()
     }
 
     const redrawDraft = () => {
@@ -120,10 +129,8 @@ export function PolygonDraw({ clearToken, onChange, onDrawingChange }: Props) {
       L.DomEvent.preventDefault(event)
       L.DomEvent.stopPropagation(event)
       drawingMode = mode
-      completedGroup.clearLayers()
       draftGroup.clearLayers()
       points.length = 0
-      onChangeRef.current(null)
       if (map.doubleClickZoom.enabled()) {
         map.doubleClickZoom.disable()
         restoreDoubleClickZoom = true
@@ -136,10 +143,12 @@ export function PolygonDraw({ clearToken, onChange, onDrawingChange }: Props) {
 
     const cancelAndClear = () => {
       points.length = 0
-      draftGroup.clearLayers()
+      if (drawing) {
+        finishDraft()
+        return
+      }
       completedGroup.clearLayers()
-      finishDraft()
-      onChangeRef.current(null)
+      publishPolygons()
     }
 
     const NativePolygonControl = L.Control.extend({
@@ -201,23 +210,16 @@ export function PolygonDraw({ clearToken, onChange, onDrawingChange }: Props) {
     })
     editControl.addTo(map)
 
-    const handleEdited = (leafletEvent: L.LeafletEvent) => {
-      const event = leafletEvent as L.DrawEvents.Edited
-      let result: LatLngTuple[] | null = null
-      event.layers.eachLayer((layer) => { result = layerPoints(layer) })
-      onChangeRef.current(result)
-    }
-    const handleDeleted = () => onChangeRef.current(null)
-
     map.on('click', handleMapClick)
-    map.on(L.Draw.Event.EDITED, handleEdited)
-    map.on(L.Draw.Event.DELETED, handleDeleted)
+    map.on(L.Draw.Event.EDITED, publishPolygons)
+    map.on(L.Draw.Event.DELETED, publishPolygons)
     clearAllRef.current = cancelAndClear
 
     return () => {
+      onDrawingChangeRef.current(false)
       map.off('click', handleMapClick)
-      map.off(L.Draw.Event.EDITED, handleEdited)
-      map.off(L.Draw.Event.DELETED, handleDeleted)
+      map.off(L.Draw.Event.EDITED, publishPolygons)
+      map.off(L.Draw.Event.DELETED, publishPolygons)
       if (restoreDoubleClickZoom) map.doubleClickZoom.enable()
       map.removeControl(nativePolygonControl)
       map.removeControl(editControl)

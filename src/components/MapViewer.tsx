@@ -35,7 +35,7 @@ function MapResizeSync() {
 }
 
 interface Props {
-  polygon: LatLngTuple[] | null
+  polygons: LatLngTuple[][]
   location: SearchLocation | null
   clearToken: number
   infraredVisible: boolean
@@ -44,15 +44,15 @@ interface Props {
   precipitationVisible: boolean
   precipitationOpacity: number
   precipitationTime: string | null
-  onPolygonChange: (points: LatLngTuple[] | null) => void
+  onPolygonsChange: (polygons: LatLngTuple[][]) => void
   onDrawingChange: (drawing: boolean) => void
 }
 
 export function MapViewer({
-  polygon, location, clearToken,
+  polygons, location, clearToken,
   infraredVisible, infraredOpacity, infraredTime,
   precipitationVisible, precipitationOpacity, precipitationTime,
-  onPolygonChange, onDrawingChange,
+  onPolygonsChange, onDrawingChange,
 }: Props) {
   return (
     <MapContainer center={GUAYAQUIL} zoom={13} minZoom={5} className="map" zoomControl={false}>
@@ -64,9 +64,9 @@ export function MapViewer({
       <PrecipitationLayer visible={precipitationVisible} opacity={precipitationOpacity} time={precipitationTime} />
       <MapResizeSync />
       <PolygonDraw
-        polygon={polygon}
+        polygons={polygons}
         clearToken={clearToken}
-        onChange={onPolygonChange}
+        onChange={onPolygonsChange}
         onDrawingChange={onDrawingChange}
       />
       <Recenter location={location} />

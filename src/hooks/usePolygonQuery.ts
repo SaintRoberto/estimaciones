@@ -12,7 +12,7 @@ export function toArcGisGeometry(points: LatLngTuple[]): ArcGisGeometry {
   return { rings: [ring], spatialReference: { wkid: 4326 } }
 }
 
-export function usePolygonQuery(polygon: LatLngTuple[] | null, indicator: Indicator) {
+export function usePolygonQuery(polygons: LatLngTuple[][], indicator: Indicator) {
   const [result, setResult] = useState<QueryResult | null>(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -24,23 +24,31 @@ export function usePolygonQuery(polygon: LatLngTuple[] | null, indicator: Indica
     setResult(null)
     setError(null)
     setLoading(false)
-  }, [polygon, indicator])
+  }, [polygons, indicator])
 
   useEffect(() => () => activeRequest.current?.abort(), [])
 
   const consult = useCallback(async () => {
-    if (!polygon || polygon.length < 3) return
+    if (polygons.length === 0) return
     activeRequest.current?.abort()
     const controller = new AbortController()
     activeRequest.current = controller
     setLoading(true)
+    setResult(null)
     setError(null)
 
     try {
-      const geometry = toArcGisGeometry(polygon)
-      const value = indicator === 'edificaciones'
-        ? await consultarEdificaciones(geometry, controller.signal)
-        : await consultarPoblacion(geometry, controller.signal)
+      const query = indicator === 'edificaciones' ? consultarEdificaciones : consultarPoblacion
+      let value = 0
+      for (const [index, polygon] of polygons.entries()) {
+        try {
+          value += await query(toArcGisGeometry(polygon), controller.signal)
+        } catch (caught) {
+          const message = caught instanceof Error ? caught.message : 'Error inesperado.'
+          throw new Error(`Polígono ${index + 1}: ${message}`)
+        }
+        if (controller.signal.aborted) return
+      }
       if (!controller.signal.aborted) setResult({ indicator, value })
     } catch (caught) {
       if (!controller.signal.aborted) {
@@ -52,7 +60,7 @@ export function usePolygonQuery(polygon: LatLngTuple[] | null, indicator: Indica
         setLoading(false)
       }
     }
-  }, [polygon, indicator])
+  }, [polygons, indicator])
 
   return { result, loading, error, consult }
 }

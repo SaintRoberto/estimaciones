@@ -4,7 +4,7 @@ import { ResultCard } from './ResultCard'
 
 interface Props {
   indicator: Indicator
-  hasPolygon: boolean
+  polygonCount: number
   isDrawing: boolean
   loading: boolean
   error: string | null
@@ -31,13 +31,15 @@ interface Props {
 
 export function QueryPanel(props: Props) {
   const {
-    indicator, hasPolygon, isDrawing, loading, error, result,
+    indicator, polygonCount, isDrawing, loading, error, result,
     infraredVisible, infraredOpacity, infraredTime, infraredLoading, infraredError,
     precipitationVisible, precipitationOpacity, precipitationTime, precipitationLoading, precipitationError,
     onIndicatorChange, onInfraredVisibleChange, onInfraredOpacityChange,
     onPrecipitationVisibleChange, onPrecipitationOpacityChange,
     onConsult, onClear, onCollapse,
   } = props
+
+  const hasPolygon = polygonCount > 0
 
   const infraredTimestamp = infraredTime
     ? new Intl.DateTimeFormat('es-EC', {
@@ -58,7 +60,7 @@ export function QueryPanel(props: Props) {
         <span className="step-number">01</span>
         <div>
           <p className="kicker">Configura tu consulta</p>
-          <h1>Analiza un área</h1>
+          <h1>Analiza áreas</h1>
         </div>
         <Button
           className="collapse-panel-button"
@@ -74,12 +76,12 @@ export function QueryPanel(props: Props) {
       <div className="instruction">
         <span className={hasPolygon ? 'instruction-dot ready' : 'instruction-dot'} />
         <div>
-          <strong>{hasPolygon ? 'Polígono listo' : isDrawing ? 'Dibujo en curso' : 'Dibuja un polígono'}</strong>
+          <strong>{isDrawing ? 'Dibujo en curso' : hasPolygon ? `${polygonCount} ${polygonCount === 1 ? 'polígono listo' : 'polígonos listos'}` : 'Dibuja un polígono'}</strong>
           <p>{
-            hasPolygon
-              ? 'Puedes editar sus vértices desde el mapa.'
-              : isDrawing
-                ? 'Agrega los vértices que necesites y vuelve al primer punto para cerrar.'
+            isDrawing
+              ? 'Agrega los vértices que necesites y vuelve al primer punto para cerrar.'
+              : hasPolygon
+                ? 'Puedes dibujar otro polígono o editar los que ya cerraste.'
                 : 'Elige una de las herramientas situadas en la esquina derecha del mapa.'
           }</p>
         </div>
@@ -165,16 +167,17 @@ export function QueryPanel(props: Props) {
         )}
       </div>
 
-      <Button type="primary" size="large" block disabled={!hasPolygon} loading={loading} onClick={onConsult}>
-        Consultar área seleccionada
+      <Button type="primary" size="large" block disabled={!hasPolygon || isDrawing} loading={loading} onClick={onConsult}>
+        {polygonCount > 1 ? 'Consultar total de las áreas' : 'Consultar área seleccionada'}
       </Button>
       <Button className="clear-polygon-button" size="large" block disabled={(!hasPolygon && !isDrawing) || loading} onClick={onClear}>
-        {isDrawing ? 'Cancelar dibujo' : 'Limpiar polígono'}
+        {isDrawing ? 'Cancelar dibujo' : 'Limpiar polígonos'}
       </Button>
 
       {error && <Alert className="query-error" type="error" showIcon message="No se pudo completar la consulta" description={error} />}
       {loading && <div className="loading-state"><Spin /><span>Consultando el servicio censal…</span></div>}
       {result && !loading && <ResultCard result={result} />}
+      {polygonCount > 1 && <small>Si un mismo sector censal o edificio intersecta varias áreas, puede contarse varias veces.</small>}
 
       <div className="panel-footer">
         <span>Fuentes de datos</span>

@@ -19,7 +19,7 @@ export default function App() {
   const [route, setRoute] = useState<AppRoute>(currentRoute)
   const [stormTheme, setStormTheme] = useState<'light' | 'dark'>(() =>
     window.localStorage.getItem('storm-theme') === 'dark' ? 'dark' : 'light')
-  const [polygon, setPolygon] = useState<LatLngTuple[] | null>(null)
+  const [polygons, setPolygons] = useState<LatLngTuple[][]>([])
   const [indicator, setIndicator] = useState<Indicator>('poblacion')
   const [location, setLocation] = useState<SearchLocation | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)
@@ -35,7 +35,7 @@ export default function App() {
   const [precipitationTime, setPrecipitationTime] = useState<string | null>(null)
   const [precipitationLoading, setPrecipitationLoading] = useState(false)
   const [precipitationError, setPrecipitationError] = useState<string | null>(null)
-  const { result, loading, error, consult } = usePolygonQuery(polygon, indicator)
+  const { result, loading, error, consult } = usePolygonQuery(polygons, indicator)
 
   useEffect(() => {
     const onPopState = () => setRoute(currentRoute())
@@ -125,7 +125,7 @@ export default function App() {
           {panelOpen && (
             <QueryPanel
               indicator={indicator}
-              hasPolygon={Boolean(polygon && polygon.length >= 3)}
+              polygonCount={polygons.length}
               isDrawing={isDrawing}
               loading={loading}
               error={error}
@@ -148,14 +148,13 @@ export default function App() {
               onConsult={consult}
               onCollapse={() => setPanelOpen(false)}
               onClear={() => {
-                setPolygon(null)
                 setClearToken((current) => current + 1)
               }}
             />
           )}
           <section className="map-stage">
             <MapViewer
-              polygon={polygon}
+              polygons={polygons}
               location={location}
               clearToken={clearToken}
               infraredVisible={infraredVisible}
@@ -164,7 +163,7 @@ export default function App() {
               precipitationVisible={precipitationVisible}
               precipitationOpacity={precipitationOpacity}
               precipitationTime={precipitationTime}
-              onPolygonChange={setPolygon}
+              onPolygonsChange={setPolygons}
               onDrawingChange={setIsDrawing}
             />
             <div className="map-caption">
