@@ -43,6 +43,7 @@ button, input { font: inherit; }
 .map { width: 100%; height: 100%; z-index: 0; }
 .leaflet-control-attribution { font-size: 10px; }
 .leaflet-draw-toolbar a { background-color: #fff; }
+.polygon-editing .leaflet-draw-tooltip { display: none; }
 .custom-polygon-control a.is-active { background-color: #dceee8; box-shadow: inset 0 0 0 2px #136f63; }
 .custom-polygon-control .custom-vertex-draw { display: grid; place-items: center; background-image: none; }
 .custom-polygon-control .custom-vertex-draw svg { width: 22px; height: 22px; fill: #fff; stroke: #e03b32; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
