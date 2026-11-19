@@ -134,7 +134,7 @@ export async function consultarPoblacion(geometries: ArcGisGeometry[], signal?: 
       if (data.features.length === 0) throw new Error('El servicio devolvió una consulta incompleta.')
       offset += data.features.length
     }
-    if (!foundSector) throw new Error(`La fuente de población no tiene datos para el polígono ${index + 1}.`)
+    if (!foundSector) throw new Error(`Los datos de población del INEC no están disponibles para el área del polígono ${index + 1}.`)
   }
 
   let total = 0
