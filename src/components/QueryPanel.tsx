@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { Alert, Button, Radio, Slider, Spin, Switch } from 'antd'
 import type { Indicator, QueryResult } from '../types/gis.types'
 import { ResultCard } from './ResultCard'
@@ -40,6 +40,7 @@ export function QueryPanel(props: Props) {
     onConsult, onClear, onCollapse,
   } = props
 
+  const [weatherControlsOpen, setWeatherControlsOpen] = useState(false)
   const panelRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
@@ -142,57 +143,68 @@ export function QueryPanel(props: Props) {
       {result && !loading && <ResultCard result={result} />}
       {indicator === 'edificaciones' && polygonCount > 1 && <small>Si un edificio intersecta varias áreas, puede contarse varias veces.</small>}
 
-      <div className="weather-layer-control">
-        <div className="weather-layer-heading">
-          <span className="weather-layer-icon precipitation-layer-icon" aria-hidden="true">▧</span>
-          <span>
-            <strong>Precipitación observada</strong>
-            <small>NASA IMERG · cada 30 minutos</small>
-          </span>
-          <Switch
-            checked={precipitationVisible}
-            loading={precipitationLoading}
-            onChange={onPrecipitationVisibleChange}
-            aria-label="Mostrar precipitación observada NASA IMERG"
-          />
-        </div>
-        {precipitationVisible && (
-          <div className="weather-layer-details">
-            <div><span>Opacidad</span><strong>{Math.round(precipitationOpacity * 100)}%</strong></div>
-            <Slider min={0.2} max={1} step={0.05} value={precipitationOpacity} onChange={onPrecipitationOpacityChange} />
-            <div className="rain-legend" aria-label="Escala de intensidad de lluvia">
-              <div className="rain-legend-gradient" />
-              <div><span>0.1</span><span>1</span><span>5</span><span>20+</span></div>
-              <small>mm/h · verde a rojo</small>
+      <Button
+        block
+        aria-expanded={weatherControlsOpen}
+        aria-controls="weather-layer-controls"
+        onClick={() => setWeatherControlsOpen((open) => !open)}
+        style={{ marginTop: 12 }}
+      >
+        {weatherControlsOpen ? 'Ocultar capas de clima' : 'Mostrar capas de clima'}
+      </Button>
+      <div id="weather-layer-controls" hidden={!weatherControlsOpen}>
+        <div className="weather-layer-control">
+          <div className="weather-layer-heading">
+            <span className="weather-layer-icon precipitation-layer-icon" aria-hidden="true">▧</span>
+            <span>
+              <strong>Precipitación observada</strong>
+              <small>NASA IMERG · cada 30 minutos</small>
+            </span>
+            <Switch
+              checked={precipitationVisible}
+              loading={precipitationLoading}
+              onChange={onPrecipitationVisibleChange}
+              aria-label="Mostrar precipitación observada NASA IMERG"
+            />
+          </div>
+          {precipitationVisible && (
+            <div className="weather-layer-details">
+              <div><span>Opacidad</span><strong>{Math.round(precipitationOpacity * 100)}%</strong></div>
+              <Slider min={0.2} max={1} step={0.05} value={precipitationOpacity} onChange={onPrecipitationOpacityChange} />
+              <div className="rain-legend" aria-label="Escala de intensidad de lluvia">
+                <div className="rain-legend-gradient" />
+                <div><span>0.1</span><span>1</span><span>5</span><span>20+</span></div>
+                <small>mm/h · verde a rojo</small>
+              </div>
+              {precipitationTimestamp && <small>Observación: {precipitationTimestamp} ECT</small>}
+              {precipitationError && <small className="weather-layer-error">{precipitationError}</small>}
             </div>
-            {precipitationTimestamp && <small>Observación: {precipitationTimestamp} ECT</small>}
-            {precipitationError && <small className="weather-layer-error">{precipitationError}</small>}
-          </div>
-        )}
-      </div>
-
-      <div className="weather-layer-control">
-        <div className="weather-layer-heading">
-          <span className="weather-layer-icon" aria-hidden="true">☁</span>
-          <span>
-            <strong>Nubes infrarrojas</strong>
-            <small>GOES-East · resalta topes fríos</small>
-          </span>
-          <Switch
-            checked={infraredVisible}
-            loading={infraredLoading}
-            onChange={onInfraredVisibleChange}
-            aria-label="Mostrar nubes infrarrojas GOES-East"
-          />
+          )}
         </div>
-        {infraredVisible && (
-          <div className="weather-layer-details">
-            <div><span>Opacidad</span><strong>{Math.round(infraredOpacity * 100)}%</strong></div>
-            <Slider min={0.2} max={1} step={0.05} value={infraredOpacity} onChange={onInfraredOpacityChange} />
-            {infraredTimestamp && <small>Imagen: {infraredTimestamp} ECT</small>}
-            {infraredError && <small className="weather-layer-error">{infraredError}</small>}
+
+        <div className="weather-layer-control">
+          <div className="weather-layer-heading">
+            <span className="weather-layer-icon" aria-hidden="true">☁</span>
+            <span>
+              <strong>Nubes infrarrojas</strong>
+              <small>GOES-East · resalta topes fríos</small>
+            </span>
+            <Switch
+              checked={infraredVisible}
+              loading={infraredLoading}
+              onChange={onInfraredVisibleChange}
+              aria-label="Mostrar nubes infrarrojas GOES-East"
+            />
           </div>
-        )}
+          {infraredVisible && (
+            <div className="weather-layer-details">
+              <div><span>Opacidad</span><strong>{Math.round(infraredOpacity * 100)}%</strong></div>
+              <Slider min={0.2} max={1} step={0.05} value={infraredOpacity} onChange={onInfraredOpacityChange} />
+              {infraredTimestamp && <small>Imagen: {infraredTimestamp} ECT</small>}
+              {infraredError && <small className="weather-layer-error">{infraredError}</small>}
+            </div>
+          )}
+        </div>
       </div>
 
       <div className="panel-footer">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
+import { MapContainer, Marker, TileLayer, ZoomControl, useMap } from 'react-leaflet'
 import type { LatLngTuple } from 'leaflet'
 import L from 'leaflet'
 import { PolygonDraw } from './PolygonDraw'
@@ -73,6 +73,7 @@ export function MapViewer({
 
   return (
     <MapContainer center={urlCenter ?? GUAYAQUIL} zoom={urlCenter ? 16 : 13} minZoom={5} className="map" zoomControl={false}>
+      <ZoomControl position="bottomright" zoomInTitle="Acercar mapa" zoomOutTitle="Alejar mapa" />
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
