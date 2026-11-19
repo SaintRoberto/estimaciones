@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { MapContainer, Marker, TileLayer, useMap } from 'react-leaflet'
 import type { LatLngTuple } from 'leaflet'
 import L from 'leaflet'
@@ -8,6 +8,21 @@ import { InfraredCloudLayer } from '../modules/tormentas/components/InfraredClou
 import { PrecipitationLayer } from '../modules/tormentas/components/PrecipitationLayer'
 
 const GUAYAQUIL: LatLngTuple = [-2.170998, -79.922359]
+
+function getUrlCenter(search: string): LatLngTuple | null {
+  const params = new URLSearchParams(search)
+  const latitude = params.get('latitud') ?? params.get('lat')
+  const longitude = params.get('longitud') ?? params.get('lng')
+  if (!latitude?.trim() || !longitude?.trim()) return null
+
+  const lat = Number(latitude)
+  const lng = Number(longitude)
+  if (!Number.isFinite(lat) || !Number.isFinite(lng) || Math.abs(lat) > 90 || Math.abs(lng) > 180) {
+    return null
+  }
+
+  return [lat, lng]
+}
 
 const markerIcon = L.divIcon({
   className: 'search-marker',
@@ -54,8 +69,10 @@ export function MapViewer({
   precipitationVisible, precipitationOpacity, precipitationTime,
   onPolygonsChange, onDrawingChange,
 }: Props) {
+  const [urlCenter] = useState(() => getUrlCenter(window.location.search))
+
   return (
-    <MapContainer center={GUAYAQUIL} zoom={13} minZoom={5} className="map" zoomControl={false}>
+    <MapContainer center={urlCenter ?? GUAYAQUIL} zoom={urlCenter ? 16 : 13} minZoom={5} className="map" zoomControl={false}>
       <TileLayer
         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
