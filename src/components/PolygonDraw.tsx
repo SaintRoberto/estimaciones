@@ -10,21 +10,12 @@ interface Props {
   onDrawingChange: (drawing: boolean) => void
 }
 
-const polygonStyle: L.PathOptions = {
-  color: '#136f63',
-  fillColor: '#21a179',
-  fillOpacity: 0.22,
-  weight: 3,
-}
-
 const vertexStyle: L.PathOptions = {
   color: '#e03b32',
   fillColor: '#e03b32',
   fillOpacity: 0.04,
   weight: 3,
 }
-
-type DrawingMode = 'area' | 'vertices'
 
 function layerPoints(layer: L.Layer): LatLngTuple[] | null {
   if (!(layer instanceof L.Polygon)) return null
@@ -44,19 +35,16 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
 
   useEffect(() => {
     const completedGroup = new L.FeatureGroup().addTo(map)
-    for (const polygon of initialPolygons.current) L.polygon(polygon, polygonStyle).addTo(completedGroup)
+    for (const polygon of initialPolygons.current) L.polygon(polygon, vertexStyle).addTo(completedGroup)
     const draftGroup = new L.FeatureGroup().addTo(map)
     const points: L.LatLng[] = []
     let drawing = false
-    let drawingMode: DrawingMode = 'area'
-    let drawButton: HTMLAnchorElement | null = null
     let vertexButton: HTMLAnchorElement | null = null
     let restoreDoubleClickZoom = false
 
     const setDrawing = (value: boolean) => {
       drawing = value
-      drawButton?.classList.toggle('is-active', value && drawingMode === 'area')
-      vertexButton?.classList.toggle('is-active', value && drawingMode === 'vertices')
+      vertexButton?.classList.toggle('is-active', value)
       onDrawingChangeRef.current(value)
     }
 
@@ -82,20 +70,16 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
       if (event?.originalEvent) L.DomEvent.stopPropagation(event.originalEvent)
       if (points.length < 3) return
 
-      const activeStyle = drawingMode === 'vertices' ? vertexStyle : polygonStyle
-      L.polygon(points, activeStyle).addTo(completedGroup)
+      L.polygon(points, vertexStyle).addTo(completedGroup)
       finishDraft()
       publishPolygons()
     }
 
     const redrawDraft = () => {
       draftGroup.clearLayers()
-      const activeStyle = drawingMode === 'vertices' ? vertexStyle : polygonStyle
 
-      if (drawingMode === 'area' && points.length >= 3) {
-        L.polygon(points, { ...activeStyle, interactive: false }).addTo(draftGroup)
-      } else if (points.length >= 2) {
-        L.polyline(points, { color: activeStyle.color, weight: activeStyle.weight, interactive: false })
+      if (points.length >= 2) {
+        L.polyline(points, { color: vertexStyle.color, weight: vertexStyle.weight, interactive: false })
           .addTo(draftGroup)
       }
 
@@ -106,7 +90,7 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
           weight: 2,
           fillColor: index === 0
             ? '#d5a641'
-            : drawingMode === 'vertices' ? '#e03b32' : '#136f63',
+            : '#e03b32',
           fillOpacity: 1,
           interactive: index === 0,
           bubblingMouseEvents: false,
@@ -125,10 +109,9 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
       redrawDraft()
     }
 
-    const startDrawing = (event: Event, mode: DrawingMode) => {
+    const startDrawing = (event: Event) => {
       L.DomEvent.preventDefault(event)
       L.DomEvent.stopPropagation(event)
-      drawingMode = mode
       draftGroup.clearLayers()
       points.length = 0
       if (map.doubleClickZoom.enabled()) {
@@ -138,8 +121,6 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
       setDrawing(true)
     }
 
-    const startAreaDrawing = (event: Event) => startDrawing(event, 'area')
-    const startVertexDrawing = (event: Event) => startDrawing(event, 'vertices')
 
     const cancelAndClear = () => {
       points.length = 0
@@ -155,11 +136,6 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
       options: { position: 'topright' as L.ControlPosition },
       onAdd() {
         const container = L.DomUtil.create('div', 'leaflet-bar leaflet-draw-toolbar custom-polygon-control')
-        drawButton = L.DomUtil.create('a', 'leaflet-draw-draw-polygon', container)
-        drawButton.href = '#'
-        drawButton.title = 'Dibujar polígono'
-        drawButton.setAttribute('role', 'button')
-        drawButton.setAttribute('aria-label', 'Dibujar polígono')
         vertexButton = L.DomUtil.create('a', 'custom-vertex-draw', container)
         vertexButton.href = '#'
         vertexButton.title = 'Selección por vértices y líneas rectas'
@@ -167,14 +143,11 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
         vertexButton.setAttribute('aria-label', 'Selección por vértices y líneas rectas')
         vertexButton.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 18 10 7l9 9"/><circle cx="5" cy="18" r="2"/><circle cx="10" cy="7" r="2"/><circle cx="19" cy="16" r="2"/></svg>'
         L.DomEvent.disableClickPropagation(container)
-        L.DomEvent.on(drawButton, 'click', startAreaDrawing)
-        L.DomEvent.on(vertexButton, 'click', startVertexDrawing)
+        L.DomEvent.on(vertexButton, 'click', startDrawing)
         return container
       },
       onRemove() {
-        if (drawButton) L.DomEvent.off(drawButton, 'click', startAreaDrawing)
-        if (vertexButton) L.DomEvent.off(vertexButton, 'click', startVertexDrawing)
-        drawButton = null
+        if (vertexButton) L.DomEvent.off(vertexButton, 'click', startDrawing)
         vertexButton = null
       },
     })
