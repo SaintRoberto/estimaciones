@@ -114,6 +114,18 @@ export function QueryPanel(props: Props) {
         </Radio.Group>
       </div>
 
+      <Button type="primary" size="large" block disabled={!hasPolygon || isDrawing} loading={loading} onClick={onConsult}>
+        {polygonCount > 1 ? 'Consultar total de las áreas' : 'Consultar área seleccionada'}
+      </Button>
+      <Button className="clear-polygon-button" size="large" block disabled={(!hasPolygon && !isDrawing) || loading} onClick={onClear}>
+        {isDrawing ? 'Cancelar dibujo' : 'Limpiar polígonos'}
+      </Button>
+
+      {error && <Alert className="query-error" type="error" showIcon message="No se pudo completar la consulta" description={error} />}
+      {loading && <div className="loading-state"><Spin /><span>Consultando el servicio censal…</span></div>}
+      {result && !loading && <ResultCard result={result} />}
+      {indicator === 'edificaciones' && polygonCount > 1 && <small>Si un edificio intersecta varias áreas, puede contarse varias veces.</small>}
+
       <div className="weather-layer-control">
         <div className="weather-layer-heading">
           <span className="weather-layer-icon precipitation-layer-icon" aria-hidden="true">▧</span>
@@ -166,18 +178,6 @@ export function QueryPanel(props: Props) {
           </div>
         )}
       </div>
-
-      <Button type="primary" size="large" block disabled={!hasPolygon || isDrawing} loading={loading} onClick={onConsult}>
-        {polygonCount > 1 ? 'Consultar total de las áreas' : 'Consultar área seleccionada'}
-      </Button>
-      <Button className="clear-polygon-button" size="large" block disabled={(!hasPolygon && !isDrawing) || loading} onClick={onClear}>
-        {isDrawing ? 'Cancelar dibujo' : 'Limpiar polígonos'}
-      </Button>
-
-      {error && <Alert className="query-error" type="error" showIcon message="No se pudo completar la consulta" description={error} />}
-      {loading && <div className="loading-state"><Spin /><span>Consultando el servicio censal…</span></div>}
-      {result && !loading && <ResultCard result={result} />}
-      {indicator === 'edificaciones' && polygonCount > 1 && <small>Si un edificio intersecta varias áreas, puede contarse varias veces.</small>}
 
       <div className="panel-footer">
         <span>Fuentes de datos</span>
