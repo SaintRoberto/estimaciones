@@ -20,7 +20,7 @@ export default function App() {
   const [stormTheme, setStormTheme] = useState<'light' | 'dark'>(() =>
     window.localStorage.getItem('storm-theme') === 'dark' ? 'dark' : 'light')
   const [polygons, setPolygons] = useState<LatLngTuple[][]>([])
-  const [indicator, setIndicator] = useState<Indicator>('poblacion')
+  const [indicator, setIndicator] = useState<Indicator>('edificaciones')
   const [location, setLocation] = useState<SearchLocation | null>(null)
   const [isDrawing, setIsDrawing] = useState(false)
   const [clearToken, setClearToken] = useState(0)

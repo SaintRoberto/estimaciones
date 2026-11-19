@@ -94,6 +94,14 @@ export function QueryPanel(props: Props) {
           value={indicator}
           onChange={(event) => onIndicatorChange(event.target.value as Indicator)}
         >
+          <Radio.Button value="edificaciones">
+            <span className="option-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M4 21V5l8-3v19M12 8h8v13M2 21h20M7 7h2M7 11h2M7 15h2M15 11h2M15 15h2" />
+              </svg>
+            </span>
+            <span><strong>Estimación Edificaciones</strong><small>Edificios censales</small></span>
+          </Radio.Button>
           <Radio.Button value="poblacion">
             <span className="option-icon" aria-hidden="true">
               <svg viewBox="0 0 24 24">
@@ -102,14 +110,6 @@ export function QueryPanel(props: Props) {
               </svg>
             </span>
             <span><strong>Estimación Personas</strong><small>Proporción del área censal</small></span>
-          </Radio.Button>
-          <Radio.Button value="edificaciones">
-            <span className="option-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M4 21V5l8-3v19M12 8h8v13M2 21h20M7 7h2M7 11h2M7 15h2M15 11h2M15 15h2" />
-              </svg>
-            </span>
-            <span><strong>Estimación Edificaciones</strong><small>Edificios censales</small></span>
           </Radio.Button>
         </Radio.Group>
       </div>
