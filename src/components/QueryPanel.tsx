@@ -82,7 +82,7 @@ export function QueryPanel(props: Props) {
               ? 'Agrega los vértices que necesites y vuelve al primer punto para cerrar.'
               : hasPolygon
                 ? 'Puedes dibujar otro polígono o editar los que ya cerraste.'
-                : 'Elige una de las herramientas situadas en la esquina derecha del mapa.'
+                : 'Usa la herramienta de líneas en la esquina derecha del mapa.'
           }</p>
         </div>
       </div>
