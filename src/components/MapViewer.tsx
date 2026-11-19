@@ -87,6 +87,9 @@ export function MapViewer({
         onDrawingChange={onDrawingChange}
       />
       <Recenter location={location} />
+      {urlCenter && (
+        <Marker position={urlCenter} icon={markerIcon} title="Punto de referencia" alt="Punto de referencia" />
+      )}
       {location && <Marker position={location.position} icon={markerIcon} />}
     </MapContainer>
   )
