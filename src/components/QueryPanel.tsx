@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react'
 import { Alert, Button, Radio, Slider, Spin, Switch } from 'antd'
 import type { Indicator, QueryResult } from '../types/gis.types'
 import { ResultCard } from './ResultCard'
@@ -39,6 +40,21 @@ export function QueryPanel(props: Props) {
     onConsult, onClear, onCollapse,
   } = props
 
+  const panelRef = useRef<HTMLElement>(null)
+
+  useEffect(() => {
+    const panel = panelRef.current
+    if (!result || loading || !panel || panel.scrollHeight <= panel.clientHeight) return
+    const card = panel.querySelector('.result-card')
+    if (!card) return
+
+    const panelBounds = panel.getBoundingClientRect()
+    const cardBounds = card.getBoundingClientRect()
+    if (cardBounds.bottom > panelBounds.bottom) {
+      panel.scrollTop += Math.min(cardBounds.top - panelBounds.top, cardBounds.bottom - panelBounds.bottom + 12)
+    }
+  }, [loading, result])
+
   const hasPolygon = polygonCount > 0
 
   const infraredTimestamp = infraredTime
@@ -55,7 +71,7 @@ export function QueryPanel(props: Props) {
     : null
 
   return (
-    <aside className="query-panel">
+    <aside className="query-panel" ref={panelRef}>
       <div className="panel-heading">
         <span className="step-number">01</span>
         <div>

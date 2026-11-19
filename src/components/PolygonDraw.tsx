@@ -155,8 +155,8 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
     const nativePolygonControl = new NativePolygonControl()
     nativePolygonControl.addTo(map)
 
-    L.drawLocal.edit.toolbar.actions.save.title = 'Terminar edición o eliminación'
-    L.drawLocal.edit.toolbar.actions.save.text = 'Listo'
+    L.drawLocal.edit.toolbar.actions.save.title = 'Guardar cambios'
+    L.drawLocal.edit.toolbar.actions.save.text = 'Guardar'
     L.drawLocal.edit.toolbar.actions.cancel.title = 'Cancelar edición y descartar los cambios'
     L.drawLocal.edit.toolbar.actions.cancel.text = 'Cancelar'
     L.drawLocal.edit.toolbar.actions.clearAll.title = 'Eliminar todos los polígonos'
@@ -184,14 +184,10 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
     editControl.addTo(map)
 
     const hideEditTooltip = () => map.getContainer().classList.add('polygon-editing')
-    const finishEditing = () => {
-      map.getContainer().classList.remove('polygon-editing')
-      publishPolygons()
-    }
+    const finishEditing = () => map.getContainer().classList.remove('polygon-editing')
 
     map.on(L.Draw.Event.EDITSTART, hideEditTooltip)
     map.on(L.Draw.Event.EDITSTOP, finishEditing)
-    map.on(L.Draw.Event.EDITVERTEX, publishPolygons)
     map.on('click', handleMapClick)
     map.on(L.Draw.Event.EDITED, publishPolygons)
     map.on(L.Draw.Event.DELETED, publishPolygons)
@@ -201,7 +197,6 @@ export function PolygonDraw({ polygons, clearToken, onChange, onDrawingChange }:
       onDrawingChangeRef.current(false)
       map.off(L.Draw.Event.EDITSTART, hideEditTooltip)
       map.off(L.Draw.Event.EDITSTOP, finishEditing)
-      map.off(L.Draw.Event.EDITVERTEX, publishPolygons)
       map.getContainer().classList.remove('polygon-editing')
       map.off('click', handleMapClick)
       map.off(L.Draw.Event.EDITED, publishPolygons)
