@@ -1,3 +1,4 @@
+import clipping, { type MultiPolygon, type Ring } from 'polygon-clipping'
 import type { ArcGisGeometry } from '../types/gis.types'
 
 const EDIFICACIONES_URL = 'https://idgn.ecuadorencifras.gob.ec/server/rest/services/Hosted/Marco_Geoestadistico_2022/FeatureServer/9/query'
@@ -13,7 +14,8 @@ function createRequestSignal(externalSignal?: AbortSignal) {
   const controller = new AbortController()
   const timeoutId = window.setTimeout(() => controller.abort('timeout'), TIMEOUT_MS)
   const abortFromExternal = () => controller.abort(externalSignal?.reason)
-  externalSignal?.addEventListener('abort', abortFromExternal, { once: true })
+  if (externalSignal?.aborted) abortFromExternal()
+  else externalSignal?.addEventListener('abort', abortFromExternal, { once: true })
 
   return {
     signal: controller.signal,
@@ -79,24 +81,80 @@ export async function consultarEdificaciones(geometry: ArcGisGeometry, signal?: 
   return data.count
 }
 
-export async function consultarPoblacion(geometry: ArcGisGeometry, signal?: AbortSignal): Promise<number> {
-  const statistics = [{
-    statisticType: 'sum',
-    onStatisticField: 'Población',
-    outStatisticFieldName: 'total_personas',
-  }]
-  const params = new URLSearchParams({
-    ...baseGeometryParams(geometry),
-    returnGeometry: 'false',
-    outStatistics: JSON.stringify(statistics),
-    f: 'json',
-  })
-  const data = await requestArcGis<{
-    features?: Array<{ attributes?: { total_personas?: number | null } }>
-  }>(POBLACION_URL, params, signal)
-  const value = data.features?.[0]?.attributes?.total_personas
-  if (value === null || value === undefined || !Number.isFinite(value)) {
-    throw new Error('El servicio de población no devolvió un valor válido para esta área.')
+interface PopulationFeature {
+  attributes: { FID: number; 'Población': number | null }
+  geometry: { rings: Ring[] }
+}
+
+function ringArea(ring: Ring): number {
+  const [originX, originY] = ring[0]
+  let twiceArea = 0
+  for (let i = 1; i < ring.length - 1; i++) {
+    const [x, y] = ring[i]
+    const [nextX, nextY] = ring[i + 1]
+    twiceArea += (x - originX) * (nextY - originY) - (nextX - originX) * (y - originY)
   }
-  return value
+  return Math.abs(twiceArea) / 2
+}
+
+// At sector scale in Ecuador, the ratio of areas in lon/lat approximates the ground-area ratio.
+function area(geometry: MultiPolygon): number {
+  return geometry.reduce((total, [exterior, ...holes]) =>
+    total + ringArea(exterior) - holes.reduce((sum, hole) => sum + ringArea(hole), 0), 0)
+}
+
+export async function consultarPoblacion(geometries: ArcGisGeometry[], signal?: AbortSignal): Promise<number> {
+  const masks = geometries.map(({ rings }) => rings as Ring[])
+  const selection = clipping.union(masks[0], ...masks.slice(1))
+  if (area(selection) <= 0) throw new Error('Dibuja un polígono con un área válida.')
+
+  const sectors = new Map<number, PopulationFeature>()
+  for (const [index, geometry] of geometries.entries()) {
+    const params = new URLSearchParams({
+      ...baseGeometryParams(geometry),
+      outFields: 'FID,Población',
+      outSR: '4326',
+      returnGeometry: 'true',
+      orderByFields: 'FID',
+      resultRecordCount: '200',
+      f: 'json',
+    })
+    let offset = 0
+    let foundSector = false
+    while (true) {
+      params.set('resultOffset', String(offset))
+      const data = await requestArcGis<{
+        features?: PopulationFeature[]
+        exceededTransferLimit?: boolean
+      }>(POBLACION_URL, params, signal)
+      if (!Array.isArray(data.features)) throw new Error('El servicio no devolvió los sectores censales.')
+      foundSector ||= data.features.length > 0
+      for (const sector of data.features) sectors.set(sector.attributes.FID, sector)
+      if (!data.exceededTransferLimit) break
+      if (data.features.length === 0) throw new Error('El servicio devolvió una consulta incompleta.')
+      offset += data.features.length
+    }
+    if (!foundSector) throw new Error(`La fuente de población no tiene datos para el polígono ${index + 1}.`)
+  }
+
+  let total = 0
+  let covered = false
+  for (const { attributes, geometry } of sectors.values()) {
+    const rings = geometry?.rings
+    if (!rings?.length) throw new Error('Un sector censal no tiene geometría disponible.')
+    // Apply even-odd fill to ArcGIS rings, including holes and disconnected parts.
+    const sector = clipping.xor([rings[0]], ...rings.slice(1).map((ring) => [ring]))
+    const sectorArea = area(sector)
+    if (sectorArea <= 0) throw new Error('Un sector censal tiene una geometría inválida.')
+    const inside = area(clipping.intersection(selection, sector))
+    if (inside <= 0) continue
+    const population = attributes['Población']
+    if (typeof population !== 'number' || !Number.isFinite(population) || population < 0) {
+      throw new Error('Faltan datos de población en un sector del área seleccionada.')
+    }
+    total += population * Math.min(1, inside / sectorArea)
+    covered = true
+  }
+  if (!covered) throw new Error('La fuente de población no tiene datos para el área seleccionada.')
+  return total
 }

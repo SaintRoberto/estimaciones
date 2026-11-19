@@ -13,6 +13,7 @@ export function ResultCard({ result }: { result: QueryResult }) {
         {numberFormat.format(result.value)}
         {isPopulation && <span> personas</span>}
       </p>
+      {isPopulation && <p>Estimación según la proporción de área cubierta en cada sector censal. Supone una distribución uniforme dentro del sector.</p>}
       <div className="result-source">
         <span>Censo Ecuador 2022</span>
         <span>{'Fuente oficial: INEC'}</span>

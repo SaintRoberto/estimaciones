@@ -101,7 +101,7 @@ export function QueryPanel(props: Props) {
                 <path d="M6.5 20v-2.3a5.5 5.5 0 0 1 11 0V20M5 10.5A2.5 2.5 0 0 0 2.5 13v2M19 10.5a2.5 2.5 0 0 1 2.5 2.5v2M4.5 8a2 2 0 1 1 0-4M19.5 8a2 2 0 1 0 0-4" />
               </svg>
             </span>
-            <span><strong>Estimación Personas</strong><small>Sectores intersectados</small></span>
+            <span><strong>Estimación Personas</strong><small>Proporción del área censal</small></span>
           </Radio.Button>
           <Radio.Button value="edificaciones">
             <span className="option-icon" aria-hidden="true">
@@ -177,7 +177,7 @@ export function QueryPanel(props: Props) {
       {error && <Alert className="query-error" type="error" showIcon message="No se pudo completar la consulta" description={error} />}
       {loading && <div className="loading-state"><Spin /><span>Consultando el servicio censal…</span></div>}
       {result && !loading && <ResultCard result={result} />}
-      {polygonCount > 1 && <small>Si un mismo sector censal o edificio intersecta varias áreas, puede contarse varias veces.</small>}
+      {indicator === 'edificaciones' && polygonCount > 1 && <small>Si un edificio intersecta varias áreas, puede contarse varias veces.</small>}
 
       <div className="panel-footer">
         <span>Fuentes de datos</span>

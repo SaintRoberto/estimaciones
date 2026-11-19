@@ -38,16 +38,20 @@ export function usePolygonQuery(polygons: LatLngTuple[][], indicator: Indicator)
     setError(null)
 
     try {
-      const query = indicator === 'edificaciones' ? consultarEdificaciones : consultarPoblacion
+      const geometries = polygons.map(toArcGisGeometry)
       let value = 0
-      for (const [index, polygon] of polygons.entries()) {
-        try {
-          value += await query(toArcGisGeometry(polygon), controller.signal)
-        } catch (caught) {
-          const message = caught instanceof Error ? caught.message : 'Error inesperado.'
-          throw new Error(`Polígono ${index + 1}: ${message}`)
+      if (indicator === 'poblacion') {
+        value = await consultarPoblacion(geometries, controller.signal)
+      } else {
+        for (const [index, geometry] of geometries.entries()) {
+          try {
+            value += await consultarEdificaciones(geometry, controller.signal)
+          } catch (caught) {
+            const message = caught instanceof Error ? caught.message : 'Error inesperado.'
+            throw new Error(`Polígono ${index + 1}: ${message}`)
+          }
+          if (controller.signal.aborted) return
         }
-        if (controller.signal.aborted) return
       }
       if (!controller.signal.aborted) setResult({ indicator, value })
     } catch (caught) {
