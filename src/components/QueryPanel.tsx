@@ -138,7 +138,7 @@ export function QueryPanel(props: Props) {
         {isDrawing ? 'Cancelar dibujo' : 'Limpiar polígonos'}
       </Button>
 
-      {error && <Alert className="query-error" type="error" showIcon message="No se pudo completar la consulta" description={error} />}
+      {error && <Alert className="query-error" type="error" showIcon message={error} />}
       {loading && <div className="loading-state"><Spin /><span>Consultando el servicio censal…</span></div>}
       {result && !loading && <ResultCard result={result} />}
       {indicator === 'edificaciones' && polygonCount > 1 && <small>Si un edificio intersecta varias áreas, puede contarse varias veces.</small>}

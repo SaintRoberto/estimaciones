@@ -109,7 +109,7 @@ export async function consultarPoblacion(geometries: ArcGisGeometry[], signal?: 
   if (area(selection) <= 0) throw new Error('Dibuja un polígono con un área válida.')
 
   const sectors = new Map<number, PopulationFeature>()
-  for (const [index, geometry] of geometries.entries()) {
+  for (const geometry of geometries) {
     const params = new URLSearchParams({
       ...baseGeometryParams(geometry),
       outFields: 'FID,Población',
@@ -134,7 +134,7 @@ export async function consultarPoblacion(geometries: ArcGisGeometry[], signal?: 
       if (data.features.length === 0) throw new Error('El servicio devolvió una consulta incompleta.')
       offset += data.features.length
     }
-    if (!foundSector) throw new Error(`Los datos de población del INEC no están disponibles para el área del polígono ${index + 1}.`)
+    if (!foundSector) throw new Error('Los datos de población del INEC no están disponibles para el área del polígono.')
   }
 
   let total = 0
